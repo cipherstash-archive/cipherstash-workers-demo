@@ -1,0 +1,6 @@
+name = "cipherstash-demo"
+main = "src/index.ts"
+compatibility_date = "2022-11-07"
+
+[site]
+bucket = "./app/dist"
