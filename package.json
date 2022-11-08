@@ -10,7 +10,8 @@
   "private": true,
   "scripts": {
     "start": "wrangler dev",
-    "deploy": "wrangler publish"
+    "deploy": "wrangler publish",
+    "postinstall": "npm --prefix app install"
   },
   "dependencies": {
     "@cipherstash/stashjs-worker": "^1.0.8",
