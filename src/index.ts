@@ -1,14 +1,14 @@
 import { Router } from "itty-router";
-import { Stash, debug } from "@cipherstash/stashjs-worker";
+import { Stash } from "@cipherstash/stashjs-worker";
 
-import { HandlerError, isValidUuid } from "./utils";
+import { HandlerError } from "./utils";
 import { serveStaticFile } from "./static";
+import { PatientRecord, PatientRecordQuery } from "./patient";
 
 import { v4 as uuidv4 } from "uuid";
 
 import SCHEMA from "../users.annotated.json";
-
-import z from "zod";
+import { decodeQuery } from "./record";
 
 export interface Env {
   // The host of the CipherStash instance
@@ -18,30 +18,6 @@ export interface Env {
   // KVNamespace used by Worker Sites to serve the static app part of the worker
   __STATIC_CONTENT: KVNamespace;
 }
-
-function dateString() {
-  return z.preprocess((x): Date | undefined => {
-    if (typeof x === "string") {
-      const date = new Date(x);
-
-      if (!isNaN(Number(date))) {
-        return date;
-      }
-    }
-
-    return undefined;
-  }, z.date());
-}
-
-const PatientRecord = z.object({
-  name: z.string(),
-  dob: dateString(),
-  phone: z.string(),
-  gender: z.string(),
-  socialSecurityNumber: z.string(),
-  medicalConditions: z.string(),
-  comments: z.string(),
-});
 
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
@@ -98,10 +74,35 @@ export default {
         })
       );
 
-      router.get(
+      router.post(
         "/search",
         withStash(async (request, stash) => {
-          throw new HandlerError("Unimplemented!", 500);
+          const result = PatientRecordQuery.safeParse(await request.json());
+
+          if (!result.success) {
+            throw new HandlerError(
+              "Failed to parse query from request body",
+              400
+            );
+          }
+
+          const query = result.data;
+
+          const { limit, offset, ordering } = query;
+
+          const records = await stash.query(
+            (builder) => decodeQuery(query, builder),
+            {
+              limit,
+              offset,
+              ordering: ordering && [ordering],
+            }
+          );
+
+          return Response.json({
+            success: true,
+            records,
+          });
         })
       );
 
