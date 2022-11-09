@@ -1,0 +1,33 @@
+{
+  "type": {
+    "name": "string",
+    "dob": "date",
+    "phone": "string",
+    "gender": "string",
+    "socialSecurityNumber": "string",
+    "medicalConditions": "string",
+    "comments": "string"
+  },
+  "indexes": {
+    "nameMatch": {
+      "kind": "match",
+      "fields": ["name"],
+      "tokenFilters": [{ "kind": "downcase" }],
+      "tokenizer": { "kind": "ngram", "tokenLength": 3 }
+    },
+
+    "exactName": {
+      "kind": "exact",
+      "field": "name"
+    },
+
+    "fuzzy": {
+      "kind": "dynamic-match",
+      "tokenFilters": [{ "kind": "downcase" }],
+      "tokenizer": { "kind": "ngram", "tokenLength": 3 }
+    },
+
+    "name": { "kind": "range", "field": "name" },
+    "dob": { "kind": "range", "field": "dob" }
+  }
+}

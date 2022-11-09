@@ -1,5 +1,5 @@
-import { useState } from "react";
 import { useForm, FieldError } from "react-hook-form";
+import { useMutation } from "react-query";
 import AdminLink from "./AdminLink";
 import { Spinner } from "./Spinner";
 import { cn } from "./utils";
@@ -12,14 +12,6 @@ interface FormType {
   socialSecurityNumber: string;
   medicalConditions: string;
   comments: string;
-}
-
-function renderLabel(error?: FieldError) {
-  if (error?.type === "required") {
-    return <span className="error">*</span>;
-  }
-
-  return null;
 }
 
 function renderError(error?: FieldError) {
@@ -41,8 +33,15 @@ export default function Home() {
     mode: "onBlur",
   });
 
-  const [data, setData] = useState<unknown>();
-  const [loading, setLoading] = useState(false);
+  const { mutate, isLoading } = useMutation(async (data: FormType) => {
+    await fetch("/secure", {
+      method: "POST",
+      body: JSON.stringify(data),
+      headers: {
+        "content-type": "application/json",
+      },
+    });
+  });
 
   return (
     <>
@@ -56,11 +55,10 @@ export default function Home() {
         <form
           className="relative grid gap-4 grid-cols-1"
           onSubmit={handleSubmit((data) => {
-            setData(data);
-            setLoading(true);
+            mutate(data);
           })}
         >
-          {loading && (
+          {isLoading && (
             <div className="flex absolute bg-white/60 left-0 top-0 w-full h-full z-10 items-center justify-center">
               <div className="flex flex-col gap-6 p-8 bg-white drop-shadow border items-center">
                 <span className="text-xl">Submitting</span>
@@ -145,8 +143,7 @@ export default function Home() {
             />
             {renderError(errors.comments)}
           </label>
-          <pre>{JSON.stringify(data, null, 2)}</pre>
-          <button type="submit" disabled={loading}>
+          <button type="submit" disabled={isLoading}>
             Submit
           </button>
         </form>
