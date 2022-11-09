@@ -1,5 +1,9 @@
 export class HandlerError extends Error {
-  constructor(public message: string, public statusCode: number) {
+  constructor(
+    public message: string,
+    public statusCode: number,
+    public context?: { [key: string]: unknown }
+  ) {
     super(`HandlerError(${statusCode}): ${message}`);
   }
 
@@ -8,6 +12,7 @@ export class HandlerError extends Error {
       {
         success: false,
         error: this.message,
+        errorContext: this.context,
       },
       { status: this.statusCode }
     );

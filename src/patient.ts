@@ -92,7 +92,7 @@ export function decodeQuery(
     if (query.name.op === "eq") {
       conditions.push(builder.exactName.eq(string(query.name.value)));
     } else {
-      conditions.push(builder.name.match(query.name.value));
+      conditions.push(builder.nameMatch.match(query.name.value));
     }
   }
 
