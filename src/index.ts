@@ -7,7 +7,7 @@ import { PatientRecord, PatientRecordQuery, decodeQuery } from "./patient";
 
 import { v4 as uuidv4 } from "uuid";
 
-import SCHEMA from "../users.annotated.json";
+import SCHEMA from "../patients.annotated.json";
 
 export interface Env {
   CIPHERSTASH_CLIENT_SECRET: string;
@@ -21,32 +21,58 @@ export interface Env {
 
 const TOKEN_COOKIE_NAME = "cs_access_token";
 
-async function getAccessToken(env: Env, request: Request): Promise<string> {
-  const cookies = `; ${request.headers.get("cookie") ?? ""}`;
-  const parts = cookies.split(`; ${TOKEN_COOKIE_NAME}=`);
-
-  if (parts.length === 2) {
-    const token = parts.pop()?.split(";").shift();
-
-    if (token) {
-      return token;
-    }
+// Cloudflare workers supports toGMTString
+declare global {
+  interface Date {
+    toGMTString(): string;
   }
+}
 
-  const response = await fetch(
-    "https://console.cipherstash.com/api/authorise",
-    {
-      method: "POST",
-      body: JSON.stringify({
-        accessKey: env.CIPHERSTASH_CLIENT_SECRET,
-      }),
-      headers: {
-        "content-type": "application/json",
-      },
+function withAuth(
+  env: Env,
+  handler: (request: Request, token: string) => Promise<Response>
+) {
+  return async (request: Request): Promise<Response> => {
+    const cookies = `; ${request.headers.get("cookie") ?? ""}`;
+    const parts = cookies.split(`; ${TOKEN_COOKIE_NAME}=`);
+
+    if (parts.length === 2) {
+      const token = parts.pop()?.split(";").shift();
+
+      if (token) {
+        return await handler(request, token);
+      }
     }
-  );
 
-  return (await response.json<{ accessToken: string }>()).accessToken;
+    const response = await fetch(
+      "https://console.cipherstash.com/api/authorise",
+      {
+        method: "POST",
+        body: JSON.stringify({
+          accessKey: env.CIPHERSTASH_CLIENT_SECRET,
+        }),
+        headers: {
+          "content-type": "application/json",
+        },
+      }
+    );
+
+    const { accessToken, expiry } = await response.json<{
+      accessToken: string;
+      expiry: number;
+    }>();
+
+    const expires = new Date(expiry * 1000 - 10 * 1000);
+
+    const res = await handler(request, accessToken);
+
+    res.headers.append(
+      "set-cookie",
+      `${TOKEN_COOKIE_NAME}=${accessToken}; SameSite=Strict; Secure; HttpOnly; expires=${expires.toGMTString()}`
+    );
+
+    return res;
+  };
 }
 
 export default {
@@ -57,28 +83,15 @@ export default {
       function withStash(
         handler: (request: Request, stash: Stash) => Promise<Response>
       ) {
-        return async (request: Request): Promise<Response> => {
-          const token = await getAccessToken(env, request);
-
-          if (!token) {
-            throw new HandlerError("Failed to get authentication token", 500);
-          }
-
+        return withAuth(env, async (request, token) => {
           const stash = Stash.fromAnnotatedSchema(SCHEMA, {
             host: env.CIPHERSTASH_HOST,
             key: env.CIPHERSTASH_KEY,
             token,
           });
 
-          const response = await handler(request, stash);
-
-          response.headers.append(
-            "set-cookie",
-            `${TOKEN_COOKIE_NAME}=${token}; SameSite=Strict; Secure; HttpOnly`
-          );
-
-          return response;
-        };
+          return await handler(request, stash);
+        });
       }
 
       router.post(
@@ -139,6 +152,7 @@ export default {
           return Response.json({
             success: true,
             records,
+
           });
         })
       );
@@ -148,19 +162,26 @@ export default {
 
       return await router.handle(request);
     } catch (e) {
-      if (e instanceof HandlerError) {
-        return e.toResponse();
-      }
+      console.error("An error occurred:", e);
 
-      console.error("An unexpected error occurred:", e);
+      const response =
+        e instanceof HandlerError
+          ? e.toResponse()
+          : Response.json(
+              {
+                success: false,
+                error: String(e),
+              },
+              { status: 500 }
+            );
 
-      return Response.json(
-        {
-          success: false,
-          error: String(e),
-        },
-        { status: 500 }
+      // delete cookie if there is an error response
+      response.headers.append(
+        "set-cookie",
+        `${TOKEN_COOKIE_NAME}=; SameSite=Strict; Secure; HttpOnly; expires=Thu, 01 Jan 1970 00:00:00 GMT`
       );
+
+      return response;
     }
   },
 };
