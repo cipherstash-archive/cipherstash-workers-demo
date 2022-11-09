@@ -8,8 +8,9 @@ body {
 }
 
 input,
-textarea {
-  @apply border drop-shadow-sm rounded p-2;
+textarea,
+select {
+  @apply border drop-shadow-sm rounded p-2 bg-white;
 }
 
 input.invalid,

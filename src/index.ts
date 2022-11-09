@@ -3,12 +3,11 @@ import { Stash } from "@cipherstash/stashjs-worker";
 
 import { HandlerError } from "./utils";
 import { serveStaticFile } from "./static";
-import { PatientRecord, PatientRecordQuery } from "./patient";
+import { PatientRecord, PatientRecordQuery, decodeQuery } from "./patient";
 
 import { v4 as uuidv4 } from "uuid";
 
 import SCHEMA from "../users.annotated.json";
-import { decodeQuery } from "./record";
 
 export interface Env {
   // The host of the CipherStash instance

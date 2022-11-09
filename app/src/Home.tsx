@@ -48,7 +48,7 @@ export default function Home() {
     <>
       <AdminLink />
       <div className="py-4 px-6 max-w-full w-[800px] drop-shadow bg-white rounded mx-auto">
-        <h2 className="text-xl mb-2">Patient Information</h2>
+        <h2 className="text-2xl mb-4">Patient Information</h2>
         <p className="mb-4 text-sm text-gray-600">
           We want to collect your medical information for totally non-malicious
           reasons.
