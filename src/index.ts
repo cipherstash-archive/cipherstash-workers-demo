@@ -68,6 +68,7 @@ function withAuth(
 
     res.headers.append(
       "set-cookie",
+      // todo: see whether this could be UTC instead of GMT
       `${TOKEN_COOKIE_NAME}=${accessToken}; SameSite=Strict; Secure; HttpOnly; expires=${expires.toGMTString()}`
     );
 
