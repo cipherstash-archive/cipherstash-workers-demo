@@ -1,4 +1,4 @@
-name = "cipherstash-demo"
+name = "cipherstash-worker-demo"
 main = "src/index.ts"
 compatibility_date = "2022-11-07"
 
