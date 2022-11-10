@@ -4,6 +4,3 @@ compatibility_date = "2022-11-07"
 
 [vars]
 CIPHERSTASH_HOST = "https://ap-southeast-2.aws.stashdata.net"
-
-[site]
-bucket = "./app/dist"

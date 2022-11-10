@@ -2,7 +2,7 @@ import { useForm, FieldError } from "react-hook-form";
 import { useMutation } from "react-query";
 import AdminLink from "./AdminLink";
 import { Spinner } from "./Spinner";
-import { cn } from "./utils";
+import { apiUrl, cn } from "./utils";
 
 interface FormType {
   name: string;
@@ -34,7 +34,7 @@ export default function Home() {
   });
 
   const { mutate, isLoading } = useMutation(async (data: FormType) => {
-    await fetch("/secure", {
+    await fetch(apiUrl("/secure"), {
       method: "POST",
       body: JSON.stringify(data),
       headers: {

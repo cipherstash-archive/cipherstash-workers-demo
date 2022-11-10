@@ -4,10 +4,8 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite dev",
-    "build": "tsc && vite build",
-    "build:watch": "vite build --watch",
-    "postinstall": "npm run build"
+    "dev": "VITE_API_DOMAIN='http://localhost:8787' vite dev",
+    "build": "tsc && vite build"
   },
   "dependencies": {
     "react": "^18.2.0",
