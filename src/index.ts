@@ -2,7 +2,6 @@ import { Router } from "itty-router";
 import { Stash } from "@cipherstash/stashjs-worker";
 
 import { HandlerError } from "./utils";
-import { serveStaticFile } from "./static";
 import { PatientRecord, PatientRecordQuery, decodeQuery } from "./patient";
 
 import { v4 as uuidv4 } from "uuid";
@@ -15,8 +14,6 @@ export interface Env {
   CIPHERSTASH_HOST: string;
   // The source encryption key for the CipherStash instance
   CIPHERSTASH_KEY: string;
-  // KVNamespace used by Worker Sites to serve the static app part of the worker
-  __STATIC_CONTENT: KVNamespace;
 }
 
 const TOKEN_COOKIE_NAME = "cs_access_token";
@@ -76,8 +73,23 @@ function withAuth(
   };
 }
 
+function withCors(handler: (request: Request, env: Env) => Promise<Response>) {
+  return async (request: Request, env: Env): Promise<Response> => {
+    const response =
+      request.method === "OPTIONS"
+        ? new Response(null)
+        : await handler(request, env);
+
+    response.headers.append("Access-Control-Allow-Origin", "*");
+    response.headers.append("Access-Control-Allow-Methods", "*");
+    response.headers.append("Access-Control-Allow-Headers", "*");
+
+    return response;
+  };
+}
+
 export default {
-  async fetch(request: Request, env: Env): Promise<Response> {
+  fetch: withCors(async (request, env) => {
     try {
       const router = Router();
 
@@ -153,13 +165,11 @@ export default {
           return Response.json({
             success: true,
             records,
-
           });
         })
       );
 
-      // Catch-all handler for serving the static app.
-      router.all("*", (request: Request) => serveStaticFile(env, request));
+      router.all("*", () => new Response(null, { status: 404 }));
 
       return await router.handle(request);
     } catch (e) {
@@ -184,5 +194,5 @@ export default {
 
       return response;
     }
-  },
+  }),
 };

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { useMutation, useQuery } from "react-query";
+import { useMutation } from "react-query";
+import { apiUrl } from "./utils";
 
 type Operator = "lt" | "lte" | "gt" | "gte" | "eq" | "between";
 
@@ -30,7 +31,7 @@ export default function Admin() {
   const [query, setQuery] = useState<Query>({});
 
   const { mutate, ...result } = useMutation(async (query: Query) => {
-    const res = await fetch("/search", {
+    const res = await fetch(apiUrl("/search"), {
       method: "POST",
       body: JSON.stringify(query),
       headers: {
