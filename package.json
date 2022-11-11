@@ -9,7 +9,7 @@
     "app:dev": "npm --prefix app run dev",
     "worker:dev": "wrangler dev",
     "postinstall": "npm --prefix app install",
-    "publish:worker": "npm run schema:annotate && wrangler publish",
+    "publish:worker": "npm run schema:annotate && NO_SCRIPT_SIZE_WARNING=true wrangler publish",
     "publish:app": "./scripts/deploy-pages.sh",
     "schema:annotate": "npx stash export-schema patients > patients.annotated.json",
     "setup": "npm run setup:create-source-key && npm run setup:create-access-key && npm run setup:admin-password",
