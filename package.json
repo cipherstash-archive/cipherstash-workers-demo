@@ -11,7 +11,7 @@
     "postinstall": "npm --prefix app install",
     "publish:worker": "wrangler publish",
     "publish:app": "./scripts/deploy-pages.sh",
-    "set-source-key": "./scripts/set-source-key.sh"
+    "setup:create-source-key": "./scripts/create-source-key.sh"
   },
   "dependencies": {
     "@cipherstash/stashjs-worker": "^1.0.8",
