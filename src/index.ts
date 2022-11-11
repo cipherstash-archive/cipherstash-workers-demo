@@ -14,6 +14,8 @@ export interface Env {
   CIPHERSTASH_HOST: string;
   // The source encryption key for the CipherStash instance
   CIPHERSTASH_KEY: string;
+  // The password for the admin dashboard
+  ADMIN_AUTH_PASSWORD: string;
 }
 
 const TOKEN_COOKIE_NAME = "cs_access_token";
@@ -23,6 +25,16 @@ declare global {
   interface Date {
     toGMTString(): string;
   }
+}
+
+function setCookie(req: Request, res: Response, token: string, expires?: Date) {
+  res.headers.append(
+    "set-cookie",
+    // todo: see whether this could be UTC instead of GMT
+    `${TOKEN_COOKIE_NAME}=${token}; SameSite=None; Secure; expires=${(
+      expires ?? new Date(0)
+    ).toGMTString()}`
+  );
 }
 
 function withAuth(
@@ -63,11 +75,7 @@ function withAuth(
 
     const res = await handler(request, accessToken);
 
-    res.headers.append(
-      "set-cookie",
-      // todo: see whether this could be UTC instead of GMT
-      `${TOKEN_COOKIE_NAME}=${accessToken}; SameSite=Strict; Secure; HttpOnly; expires=${expires.toGMTString()}`
-    );
+    setCookie(request, res, accessToken, expires);
 
     return res;
   };
@@ -80,9 +88,20 @@ function withCors(handler: (request: Request, env: Env) => Promise<Response>) {
         ? new Response(null)
         : await handler(request, env);
 
-    response.headers.append("Access-Control-Allow-Origin", "*");
-    response.headers.append("Access-Control-Allow-Methods", "*");
-    response.headers.append("Access-Control-Allow-Headers", "*");
+    const origin = request.headers.get("origin");
+
+    if (!origin) {
+      throw new HandlerError("Expected origin header", 400);
+    }
+
+    response.headers.append("Access-Control-Allow-Origin", origin);
+    response.headers.append("Access-Control-Allow-Methods", "POST");
+    response.headers.append(
+      "Access-Control-Allow-Headers",
+      "content-type,authorization"
+    );
+    response.headers.append("Access-Control-Allow-Credentials", "true");
+    response.headers.append("Access-Control-Max-Age", "600");
 
     return response;
   };
@@ -105,6 +124,25 @@ export default {
 
           return await handler(request, stash);
         });
+      }
+
+      function withAdminAuth(handler: (request: Request) => Promise<Response>) {
+        return async (request: Request): Promise<Response> => {
+          const auth = request.headers.get("authorization");
+
+          if (!auth) {
+            throw new HandlerError("Expected auth header", 401);
+          }
+
+          const [, encoded] = auth.split("Basic ");
+          const decoded = atob(encoded);
+
+          if (decoded !== `admin:${env.ADMIN_AUTH_PASSWORD}`) {
+            throw new HandlerError("Invalid credentials", 401);
+          }
+
+          return await handler(request);
+        };
       }
 
       router.post(
@@ -138,35 +176,42 @@ export default {
 
       router.post(
         "/search",
-        withStash(async (request, stash) => {
-          const result = PatientRecordQuery.safeParse(await request.json());
+        withAdminAuth(
+          withStash(async (request, stash) => {
+            const result = PatientRecordQuery.safeParse(await request.json());
 
-          if (!result.success) {
-            throw new HandlerError(
-              "Failed to parse query from request body",
-              400,
-              result.error.format()
-            );
-          }
-
-          const query = result.data;
-
-          const { limit, offset, ordering } = query;
-
-          const records = await stash.query(
-            (builder) => decodeQuery(query, builder),
-            {
-              limit,
-              offset,
-              ordering: ordering && [ordering],
+            if (!result.success) {
+              throw new HandlerError(
+                "Failed to parse query from request body",
+                400,
+                result.error.format()
+              );
             }
-          );
 
-          return Response.json({
-            success: true,
-            records,
-          });
-        })
+            const query = result.data;
+
+            const { limit, offset, ordering } = query;
+
+            const records = await stash.query(
+              (builder) => decodeQuery(query, builder),
+              {
+                limit,
+                offset,
+                ordering: ordering && [ordering],
+              }
+            );
+
+            return Response.json({
+              success: true,
+              records,
+            });
+          })
+        )
+      );
+
+      router.post(
+        "/login",
+        withAdminAuth(async (request) => Response.json({ success: true }))
       );
 
       router.all("*", () => new Response(null, { status: 404 }));
@@ -187,10 +232,7 @@ export default {
             );
 
       // delete cookie if there is an error response
-      response.headers.append(
-        "set-cookie",
-        `${TOKEN_COOKIE_NAME}=; SameSite=Strict; Secure; HttpOnly; expires=Thu, 01 Jan 1970 00:00:00 GMT`
-      );
+      setCookie(request, response, "");
 
       return response;
     }

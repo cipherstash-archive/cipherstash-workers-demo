@@ -13,6 +13,12 @@ select {
   @apply border drop-shadow-sm rounded p-2 bg-white;
 }
 
+input:disabled,
+textarea:disabled,
+select:disabled {
+  @apply bg-gray-100 opacity-70;
+}
+
 input.invalid,
 textarea.invalid {
   @apply outline outline-2 outline-red-500/60;
@@ -37,4 +43,12 @@ form > button[type="submit"] {
 
 form > button[type="submit"]:hover {
   @apply bg-blue-600;
+}
+
+table thead td {
+  @apply bg-gray-100;
+}
+
+table td {
+  @apply border p-2;
 }
