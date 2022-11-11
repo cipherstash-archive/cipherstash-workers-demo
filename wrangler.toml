@@ -3,4 +3,4 @@ main = "src/index.ts"
 compatibility_date = "2022-11-07"
 
 [vars]
-CIPHERSTASH_HOST = "https://ap-southeast-2.aws.stashdata.net"
+CIPHERSTASH_HOST = "https://us-east-1.aws.stashdata.net"
