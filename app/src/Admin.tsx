@@ -34,7 +34,7 @@ function SignIn({ onSuccess }: { onSuccess: (header: string) => void }) {
 
   return (
     <div className="border p-4 rounded grid gap-2">
-      <h3 className="text-xl">Login</h3>
+      <h3 className="text-xl">Sign in</h3>
       <form
         className="grid grid-cols-1 gap-2"
         onSubmit={handleSubmit((value) => mutate(value))}
