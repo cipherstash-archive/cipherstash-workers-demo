@@ -58,13 +58,21 @@ function withAuth(
       {
         method: "POST",
         body: JSON.stringify({
-          accessKey: env.CIPHERSTASH_CLIENT_SECRET,
+          accessKey: env.CIPHERSTASH_CLIENT_SECRET.trim(),
         }),
         headers: {
           "content-type": "application/json",
         },
       }
     );
+
+    if (response.status !== 200) {
+      throw new HandlerError(
+        "Failed to exchange auth token",
+        401,
+        await response.json<{}>().catch(() => undefined)
+      );
+    }
 
     const { accessToken, expiry } = await response.json<{
       accessToken: string;
@@ -91,7 +99,7 @@ function withCors(handler: (request: Request, env: Env) => Promise<Response>) {
     const origin = request.headers.get("origin");
 
     if (!origin) {
-      throw new HandlerError("Expected origin header", 400);
+      return response;
     }
 
     response.headers.append("Access-Control-Allow-Origin", origin);
