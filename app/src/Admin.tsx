@@ -49,7 +49,7 @@ function SignIn({ onSuccess }: { onSuccess: (header: string) => void }) {
         </label>
         <label>
           <span>Password</span>
-          <input type="text" {...register("password", { required: true })} />
+          <input type="password" {...register("password", { required: true })} />
         </label>
         <button type="submit" disabled={isLoading}>
           {isLoading && "Loading..."}
