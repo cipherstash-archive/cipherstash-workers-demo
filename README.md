@@ -130,7 +130,7 @@ npm run publish:worker
 And publish the app to interact with the Worker:
 
 ``` bash
-npm run publish:app <worker url>
+npm run publish:app $WORKER_APP_URL
 ```
 
 And follow the steps to create the project.
