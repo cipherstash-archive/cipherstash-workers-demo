@@ -48,7 +48,7 @@ It's of the form `https://<region>.aws.stashdata.net`.
 
 Note that only `us-east-1` and `ap-southeast-2` are currently available while CipherStash QX is in technology preview.
 
-# Set up a Cloudflare Worker
+### Set up a Cloudflare Worker
 
 If you don't already have Cloudflare account, [sign up](https://dash.cloudflare.com/sign-up), and login to Wrangler:
 
