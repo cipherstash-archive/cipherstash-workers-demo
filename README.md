@@ -4,7 +4,7 @@ This repo demonstrates how to use CipherStash QX with on Cloudflare Workers.
 
 The demo is a secure form submission service, that is made of two parts:
 
-1. A simple site to submit forms containing sensitive data. It also has an admin section (&Pi;) to query the forms.
+1. A simple site to submit forms containing sensitive data. It also has an admin section (&pi;) to query the forms.
 1. A Worker the site POSTs to, encrypts the forms, and stores them in CipherStash.
 
 ## How to use
