@@ -15,7 +15,8 @@
     "setup": "npm run setup:create-source-key && npm run setup:create-access-key && npm run setup:admin-password",
     "setup:create-source-key": "./scripts/create-source-key.sh",
     "setup:create-access-key": "./scripts/create-access-key.sh",
-    "setup:admin-password": "wrangler secret put ADMIN_AUTH_PASSWORD"
+    "setup:admin-password": "wrangler secret put ADMIN_AUTH_PASSWORD",
+    "teardown:revoke-access-key": "npx stash revoke-key --name cloudflare-worker"
   },
   "dependencies": {
     "@cipherstash/stashjs-worker": "^1.0.8",
