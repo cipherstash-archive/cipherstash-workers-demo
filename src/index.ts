@@ -10,8 +10,6 @@ import SCHEMA from "../patients.annotated.json";
 
 export interface Env {
   CIPHERSTASH_CLIENT_SECRET: string;
-  // The host of the CipherStash instance
-  CIPHERSTASH_HOST: string;
   // The source encryption key for the CipherStash instance
   CIPHERSTASH_KEY: string;
   // The password for the admin dashboard
@@ -125,7 +123,7 @@ export default {
       ) {
         return withAuth(env, async (request, token) => {
           const stash = Stash.fromAnnotatedSchema(SCHEMA, {
-            host: env.CIPHERSTASH_HOST,
+            host: `https://${SCHEMA.service.host}`,
             key: env.CIPHERSTASH_KEY,
             token,
           });
