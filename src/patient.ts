@@ -10,6 +10,9 @@ import { HandlerError } from "./utils";
 
 import z from "zod";
 
+/**
+ * Decode a date string into a Date object
+ */
 function dateString() {
   return z.preprocess((x): Date | undefined => {
     if (typeof x === "string") {
@@ -76,8 +79,11 @@ export const PatientRecordQuery = z
   })
   .partial();
 
-type PatientRecordQuery = typeof PatientRecordQuery._type;
+type PatientRecordQuery = z.TypeOf<typeof PatientRecordQuery>
 
+/**
+ * Decode a PatientRecordQuery and apply it to a CipherStash QueryBuilder
+ */
 export function decodeQuery(
   query: PatientRecordQuery,
   builder: QueryBuilder
