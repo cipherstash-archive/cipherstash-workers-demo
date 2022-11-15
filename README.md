@@ -141,3 +141,10 @@ Now visit your pages domain and test out the app and worker.
 This last step creates a new Pages project, so it might take a few minutes for the DNS records to propagate.
 
 Don’t forget to visit `/admin` to query the encrypted forms.
+
+## CipherStash in your existing DB or App
+
+You can also use CipherStash [Protect](https://cipherstash.com/protect)
+to add searchable encryption to your existing database or application.
+
+Apply to the Early Access Program [here](https://cipherstash.com/early-access).
