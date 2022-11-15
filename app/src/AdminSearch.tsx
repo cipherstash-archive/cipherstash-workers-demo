@@ -253,7 +253,7 @@ export function AdminSearch({ authorization }: { authorization: string }) {
                 <h3 className={"text-xl"}>Selected Patient</h3>
               </Dialog.Title>
               <Dialog.Description>
-                <PatientForm disabled hideSubmit value={selected as any} />
+                {selected && <PatientForm disabled hideSubmit value={selected} />}
               </Dialog.Description>
               <button onClick={() => setSelected(undefined)}>Close</button>
             </div>
