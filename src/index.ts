@@ -6,7 +6,7 @@ import { PatientRecord, PatientRecordQuery, decodeQuery } from "./patient";
 import { v4 as uuidv4 } from "uuid";
 
 import { withCors } from "./withCors";
-import { deleteCookie, withStash } from "./withStash";
+import { deleteCookie, withAuth, withStash } from "./withStash";
 import { withAdminAuth } from "./withAdminAuth";
 
 export interface Env {
@@ -93,6 +93,12 @@ export default {
       router.post(
         "/login",
         withAdminAuth(env, async () => Response.json({ success: true }))
+      );
+
+      // This endpoint is used when the app first loads to get an authentication token and validate CORS
+      router.post(
+        "/auth-preflight",
+        withAuth(env, async () => Response.json({ success: true }))
       );
 
       // If the worker doesn't have
