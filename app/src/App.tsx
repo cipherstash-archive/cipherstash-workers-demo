@@ -3,12 +3,14 @@ import { QueryClient, QueryClientProvider } from "react-query";
 
 import Home from "./Home";
 import Admin from "./Admin";
+import { AuthPreflight } from "./AuthPreflight";
 
 const DEFAULT_QUERY_CLIENT = new QueryClient();
 
 function App() {
   return (
     <QueryClientProvider client={DEFAULT_QUERY_CLIENT}>
+      <AuthPreflight />
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Home />} />

@@ -39,7 +39,7 @@ function bufferToHex(buffer: Uint8Array): string {
     .join("");
 }
 
-function withAuth(
+export function withAuth(
   env: Env,
   handler: (request: Request, token: string) => Promise<Response>
 ) {
@@ -114,7 +114,7 @@ function withAuth(
     // Set the cookie to expire 10s before the actual access token expires.
     // This ensures that the user will need to go back through the token exchange flow before the token has expired
     // which saves them from running into any unauthorised errors.
-    const expires = new Date(expiry * 1000 - 10 * 1000);
+    const expires = new Date(expiry * 1000 - (5 * 60 * 1000));
 
     const res = await handler(request, accessToken);
 
