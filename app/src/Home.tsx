@@ -8,7 +8,7 @@ import { apiUrl } from "./utils";
 export default function Home() {
   const [formId, setFormId] = useState(0);
   const { mutate, ...result } = useMutation(async (data: FormType) => {
-    await fetch(apiUrl("/secure"), {
+    const response = await fetch(apiUrl("/secure"), {
       method: "POST",
       body: JSON.stringify(data),
       headers: {
@@ -16,6 +16,10 @@ export default function Home() {
       },
       credentials: "include",
     });
+
+    if (response.status !== 200) {
+      throw new Error(`Recieved non-200 status code: ${response.status}`);
+    }
 
     setFormId((x) => x + 1);
   });
