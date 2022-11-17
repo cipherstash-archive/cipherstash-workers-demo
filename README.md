@@ -142,6 +142,17 @@ This last step creates a new Pages project, so it might take a few minutes for t
 
 Don’t forget to visit `/admin` to query the encrypted forms.
 
+### Bulk Upload Sample Data
+
+In order to bulk upload some sample data to the worker, run the following:
+
+``` bash
+npm run bulk-upload $WORKER_APP_URL
+```
+
+This will upload all data from [patients.data.json](patients.data.json) to the worker endpoint.
+You can check the contents of that file for some sample value to query on the `/admin` page.
+
 ## CipherStash in your existing DB or App
 
 You can also use CipherStash [Protect](https://cipherstash.com/protect)

@@ -16,7 +16,8 @@
     "setup:create-source-key": "./scripts/create-source-key.sh",
     "setup:create-access-key": "./scripts/create-access-key.sh",
     "setup:admin-password": "wrangler secret put ADMIN_AUTH_PASSWORD",
-    "teardown:revoke-access-key": "npx stash revoke-key --name cloudflare-worker"
+    "teardown:revoke-access-key": "npx stash revoke-key --name cloudflare-worker",
+    "bulk-upload": "./scripts/bulk-upload.sh"
   },
   "dependencies": {
     "@cipherstash/stashjs-worker": "^1.1.0",
