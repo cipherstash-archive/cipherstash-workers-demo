@@ -1,6 +1,6 @@
 # cipherstash-workers-demo
 
-This repo demonstrates how to use CipherStash QX with on Cloudflare Workers.
+This repo demonstrates how to use CipherStash QX on Cloudflare Workers.
 
 The demo is a secure form submission service, that is made of two parts:
 
